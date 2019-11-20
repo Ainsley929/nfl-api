@@ -13,7 +13,8 @@ app.get('/teams', async (request, response) => {
 app.get('/teams/:input', async (request, response) => {
     const matchingTeams = await models.Teams.findAll({
         where: {
-            [Op.or]: [{ id: request.params.input }, { abbreviation: request.params.input }]
+            [Op.or]: [{ id: request.params.input }, { abbreviation: request.params.input }, { mascot: request.params.input },
+            { conference: request.params.input }, { division: request.params.input }]
         }
     })
 
