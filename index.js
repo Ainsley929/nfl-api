@@ -1,18 +1,21 @@
 const bodyParser = require('body-parser')
 const express = require('express')
-const teams = require('./teams.json')
+const sequelize = require('sequelize')
+const models = require('./models')
+const Op = sequelize.Op
 
 const app = express()
 
-app.get('/teams/', (request, response) => {
+app.get('/teams', async (request, response) => {
+    const teams = await models.teams.findAll()
     response.send(teams)
 })
-app.get('/teams/:input', (request, response) => {
-    const matchingTeams = teams.filter((team) => {
-        return team.id === parseInt(request.params.input) || team.abbreviation.toUpperCase() === request.params.input.toUpperCase()
-
+app.get('/teams/:input', async (request, response) => {
+    const matchingTeams = await models.Teams.findAll({
+        where: {
+            [Op.or]: [{ id: request.params.input }, { abbreviation: request.params.input }]
+        }
     })
-
 
     if (matchingTeams.length) {
         response.send(matchingTeams)
@@ -23,15 +26,15 @@ app.get('/teams/:input', (request, response) => {
 
 app.use(bodyParser.json())
 
-app.post('/teams', (request, response) => {
-    const { id, location, mascot, abbreviation, conference, division } = request.body
-    if (!id || !location || !mascot || !abbreviation || !conference || !division) {
+app.post('/teams', async (request, response) => {
+    const { location, mascot, abbreviation, conference, division } = request.body
+    if (!location || !mascot || !abbreviation || !conference || !division) {
 
-        response.status(404).send('please provide information for all fields')
+        response.status(400).send('please provide information for all fields')
     }
-    const newTeam = { id, location, mascot, abbreviation, conference, division }
+    const newTeam = await models.Teams.create({ location, mascot, abbreviation, conference, division })
 
-    teams.push(newTeam)
+
     response.status(201).send(newTeam)
 })
 
