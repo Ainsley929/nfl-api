@@ -7,14 +7,14 @@ const Op = sequelize.Op
 const app = express()
 
 app.get('/teams', async (request, response) => {
-    const teams = await models.teams.findAll()
+    const teams = await models.Teams.findAll()
     response.send(teams)
 })
 app.get('/teams/:input', async (request, response) => {
     const matchingTeams = await models.Teams.findAll({
         where: {
             [Op.or]: [{ id: request.params.input }, { abbreviation: request.params.input }, { mascot: request.params.input },
-            { conference: request.params.input }, { division: request.params.input }]
+            { conference: request.params.input }, { division: request.params.input }, { location: request.params.input }]
         }
     })
 
